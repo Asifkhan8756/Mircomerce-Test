@@ -21,22 +21,34 @@ import type { SourceDataType, TableDataType } from "./types";
  */
 
 const tableData: TableDataType[] = (
-  sourceData as unknown as SourceDataType[]
+  sourceData.filter(dataRow => dataRow.employees !== undefined || dataRow.externals !== undefined) as unknown as SourceDataType[]
 ).map((dataRow, index) => {
-  const person = `${dataRow?.employees?.firstname} - ...`;
 
-  const row: TableDataType = {
+  const person = dataRow.employees !== undefined ? dataRow.employees.name : dataRow.externals?.name;
+
+  
+  const row: TableDataType = dataRow.employees !== undefined ? {
     person: `${person}`,
-    past12Months: `past12Months ${index} placeholder`,
-    y2d: `y2d ${index} placeholder`,
-    may: `may ${index} placeholder`,
-    june: `june ${index} placeholder`,
-    july: `july ${index} placeholder`,
-    netEarningsPrevMonth: `netEarningsPrevMonth ${index} placeholder`,
+    past12Months: `${(parseFloat(dataRow?.employees?.workforceUtilisation?.utilisationRateLastTwelveMonths || '0') * 100)}%`,
+    y2d: `${(parseFloat(dataRow?.employees?.workforceUtilisation?.utilisationRateYearToDate || '0') * 100)}%`,
+    may: `${(parseFloat(dataRow?.employees?.workforceUtilisation?.lastThreeMonthsIndividually?.find(month => month.month === 'May')?.utilisationRate || '0') * 100)}%`,
+    june: `${(parseFloat(dataRow?.employees?.workforceUtilisation?.lastThreeMonthsIndividually?.find(month => month.month === 'June')?.utilisationRate || '0') * 100)}%`,
+    july: `${(parseFloat(dataRow?.employees?.workforceUtilisation?.lastThreeMonthsIndividually?.find(month => month.month === 'July')?.utilisationRate || '0') * 100)}%`,
+    netEarningsPrevMonth: `${(parseFloat(dataRow?.employees?.workforceUtilisation?.monthlyCostDifference || '0') )} EUR`,
+  } : {
+    person: `${dataRow.externals?.name}`,
+    past12Months: `${(parseFloat(dataRow.externals?.workforceUtilisation?.utilisationRateLastTwelveMonths || '0') * 100)}%`,
+    y2d: `${(parseFloat(dataRow.externals?.workforceUtilisation?.utilisationRateYearToDate || '0') * 100)}%`,
+    may: `${(parseFloat(dataRow.externals?.workforceUtilisation?.lastThreeMonthsIndividually?.find(month => month.month === 'May')?.utilisationRate || '0') * 100)}%`,
+    june: `${(parseFloat(dataRow.externals?.workforceUtilisation?.lastThreeMonthsIndividually?.find(month => month.month === 'June')?.utilisationRate || '0') * 100)}%`,
+    july: `${(parseFloat(dataRow.externals?.workforceUtilisation?.lastThreeMonthsIndividually?.find(month => month.month === 'July')?.utilisationRate || '0') * 100)}%`,
+    netEarningsPrevMonth: `${(parseFloat(dataRow.externals?.workforceUtilisation?.monthlyCostDifference || '0') )} EUR`,
   };
 
   return row;
 });
+
+console.log(sourceData);
 
 const Example = () => {
   const columns = useMemo<MRT_ColumnDef<TableDataType>[]>(
